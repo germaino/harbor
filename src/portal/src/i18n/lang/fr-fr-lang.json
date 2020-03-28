@@ -70,6 +70,7 @@
         "EMAIL": "L'email doit être une adresse email valide comme name@example.com.",
         "USER_NAME": "Ne peut pas contenir de caractères spéciaux et la longueur maximale doit être de 255 caractères.",
         "FULL_NAME": "La longueur maximale doit être de 20 caractères.",
+        "FINGERPRINT": "La longueur maximale doit être de 100 caractères.",
         "COMMENT": "La longueur des commentaires doit être inférieure à 30 caractères.",
         "CURRENT_PWD": "Le mot de passe actuel est requis.",
         "PASSWORD": "Le mot de passe doit être composé de 8 à 20 caractères avec au moins 1 majuscule, 1 minuscule et 1 chiffre.",
@@ -104,6 +105,7 @@
         "USER_NAME": "Entrez votre nom d'utilisateur",
         "MAIL": "Entrez l'adresse e-mail",
         "FULL_NAME": "Entrer le nom complet",
+        "FINGERPRINT": "Entrer le fingerprint du certificat",
         "SIGN_IN_NAME": "Nom d'utilisateur",
         "SIGN_IN_PWD": "Mot de passe"
     },
@@ -112,6 +114,7 @@
         "USER_NAME": "Nom d'utilisateur",
         "EMAIL": "Email",
         "FULL_NAME": "Prénom et nom",
+        "FINGERPRINT": "Certificat fingerprint",
         "COMMENT": "Commentaires",
         "PASSWORD": "Mot de passe",
         "SAVE_SUCCESS": "Profil utilisateur sauvegardé avec succès.",

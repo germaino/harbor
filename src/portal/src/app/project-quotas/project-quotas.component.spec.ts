@@ -17,6 +17,7 @@ describe('ProjectQuotasComponent', () => {
     username: 'admin',
     email: 'harbor@vmware.com',
     realname: 'admin',
+    fingerprint: 'admin',
     has_admin_role: true,
     comment: 'no comment'
   };

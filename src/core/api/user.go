@@ -641,6 +641,10 @@ func commonValidate(user models.User) error {
 	if utils.IsIllegalLength(user.Comment, -1, 30) {
 		return fmt.Errorf("comment with illegal length")
 	}
+
+	if utils.IsIllegalLength(user.Fingerprint, -1, 255) {
+		return fmt.Errorf("fingerprint with illegal length")
+	}
 	return nil
 
 }

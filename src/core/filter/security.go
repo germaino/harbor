@@ -153,6 +153,7 @@ func (c *configCtxModifier) Modify(ctx *beegoctx.Context) bool {
 	if err != nil {
 		log.Warningf("Failed to get auth mode, err: %v", err)
 	}
+	log.Debugf("Add to request AuthModeKey %s", m)
 	addToReqContext(ctx.Request, AuthModeKey, m)
 	return false
 }
@@ -162,6 +163,7 @@ type secretReqCtxModifier struct {
 }
 
 func (s *secretReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
+	log.Debug("Secret: Get request")
 	scrt := secstore.FromRequest(ctx.Request)
 	if len(scrt) == 0 {
 		return false
@@ -182,13 +184,19 @@ func (s *secretReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
 type robotAuthReqCtxModifier struct{}
 
 func (r *robotAuthReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
+
+	log.Debug("Robot: Authentication")
+
 	robotName, robotTk, ok := ctx.Request.BasicAuth()
 	if !ok {
+		log.Debug("Robot: Basic auth fail")
 		return false
 	}
 	if !strings.HasPrefix(robotName, common.RobotPrefix) {
+		log.Debug("Robot: Do not contains a robot prefix")
 		return false
 	}
+
 	rClaims := &robot_claim.Claim{}
 	opt := pkg_token.DefaultTokenOptions()
 	rtk, err := pkg_token.Parse(opt, robotTk, rClaims)
@@ -196,6 +204,8 @@ func (r *robotAuthReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
 		log.Errorf("failed to decrypt robot token, %v", err)
 		return false
 	}
+
+	log.Debug("Do authn for robot account")
 	// Do authn for robot account, as Harbor only stores the token ID, just validate the ID and disable.
 	ctr := robot.RobotCtr
 	robot, err := ctr.GetRobotAccount(rtk.Claims.(*robot_claim.Claim).TokenID)
@@ -378,8 +388,12 @@ func (ap *authProxyReqCtxModifier) matchAuthProxyUserName(name string) (string, 
 type basicAuthReqCtxModifier struct{}
 
 func (b *basicAuthReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
+	log.Debug("BasicAuth: Authentication")
+
+	fmt.Printf("test: %+v\n", ctx.Request)
 	username, password, ok := ctx.Request.BasicAuth()
 	if !ok {
+		log.Debug("BasicAuth: Basic auth fail")
 		return false
 	}
 	log.Debug("got user information via basic auth")
@@ -454,6 +468,8 @@ func (b *basicAuthReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
 type sessionReqCtxModifier struct{}
 
 func (s *sessionReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
+
+	log.Debug("SessioncAuth: Authentication")
 	userInterface := ctx.Input.Session("user")
 	if userInterface == nil {
 		log.Debug("can not get user information from session")

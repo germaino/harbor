@@ -24,6 +24,7 @@ export class User {
     email?: string;
     password?: string;
     comment?: string;
+    fingerprint?: string;
     deleted?: boolean;
     role_name?: string;
     role_id?: number;

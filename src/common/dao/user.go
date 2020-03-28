@@ -29,9 +29,10 @@ import (
 // GetUser ...
 func GetUser(query models.User) (*models.User, error) {
 
+	log.Debug("Entering GetUser")
 	o := GetOrmer()
 
-	sql := `select user_id, username, password, password_version, email, realname, comment, reset_uuid, salt,
+	sql := `select user_id, username, password, password_version, email, realname, comment, fingerprint, reset_uuid, salt,
 		sysadmin_flag, creation_time, update_time
 		from harbor_user u
 		where deleted = false `
@@ -57,12 +58,14 @@ func GetUser(query models.User) (*models.User, error) {
 	}
 
 	var u []models.User
+	log.Debug("Query rows")
 	n, err := o.Raw(sql, queryParam).QueryRows(&u)
 
 	if err != nil {
 		return nil, err
 	}
 	if n == 0 {
+		log.Debug("Error GetUser, n = 0")
 		return nil, nil
 	}
 

@@ -17,6 +17,7 @@ export class SessionUser {
     username: string;
     email: string;
     realname: string;
+    fingerprint: string;
     role_name?: string;
     role_id?: number;
     has_admin_role?: boolean;

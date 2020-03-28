@@ -72,7 +72,8 @@ export class NewUserFormComponent implements AfterViewChecked, OnInit {
             "email": true,
             "realname": true,
             "newPassword": true,
-            "confirmPassword": true,
+	    "confirmPassword": true,
+	    "fingerprint": true,
             "comment": true
         };
     }

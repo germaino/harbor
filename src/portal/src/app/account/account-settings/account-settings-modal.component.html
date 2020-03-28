@@ -58,7 +58,14 @@
                     {{'TOOLTIP.COMMENT' | translate}}
                 </clr-control-error>
             </clr-input-container>
-
+            <clr-input-container>
+                <label>{{'PROFILE.FINGERPRINT' | translate}}</label>
+                <input clrInput type="text" #fingerPrintInput="ngModel" maxlength="50" size="50"
+                    name="account_settings_fingerprint" [(ngModel)]="account.fingerprint" id="account_settings_fingerprint">
+                <clr-control-error *ngIf="fingerPrintInput.invalid && (fingerPrintInput.dirty || fingerPrintInput.touched)">
+                    {{'TOOLTIP.FINGERPRINT' | translate}}
+                </clr-control-error>
+            </clr-input-container>
                 <div class="clr-form-control cli-secret" *ngIf="account.oidc_user_meta">
                 <label class="clr-control-label">{{'PROFILE.CLI_PASSWORD' | translate}}
                     <clr-tooltip>

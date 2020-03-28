@@ -19,6 +19,7 @@
   "password": "",
   "realname": "",
   "comment": "",
+  "fingerprint": "",
   "deleted": false,
   "role_name": "projectAdmin",
   "role_id": 1,
