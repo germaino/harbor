@@ -5,7 +5,7 @@ from pathlib import Path
 from g import config_dir, templates_dir, host_root_dir, DEFAULT_GID, DEFAULT_UID, data_dir
 from utils.misc import prepare_dir, mark_file
 from utils.jinja import render_jinja
-from utils.cert import SSL_CERT_KEY_PATH, SSL_CERT_PATH
+from utils.cert import SSL_CERT_KEY_PATH, SSL_CERT_PATH,SSL_ROOT_CA_CERT_KEY_PATH
 
 host_ngx_real_cert_dir = Path(os.path.join(data_dir, 'secret', 'cert'))
 
@@ -23,7 +23,7 @@ def prepare_nginx(config_dict):
     render_nginx_template(config_dict)
 
 
-def prepare_nginx_certs(cert_key_path, cert_path):
+def prepare_nginx_certs(cert_key_path, cert_path, root_ca_cert_path):
     """
     Prepare the certs file with proper ownership
     1. Remove nginx cert files in secret dir
@@ -32,6 +32,7 @@ def prepare_nginx_certs(cert_key_path, cert_path):
     """
     host_ngx_cert_key_path = Path(os.path.join(host_root_dir, cert_key_path.lstrip('/')))
     host_ngx_cert_path = Path(os.path.join(host_root_dir, cert_path.lstrip('/')))
+    host_ngnx_root_ca_cert_path = Path(os.path.join(host_root_dir, root_ca_cert_path.lstrip('/')))
 
     if host_ngx_real_cert_dir.exists() and host_ngx_real_cert_dir.is_dir():
         shutil.rmtree(host_ngx_real_cert_dir)
@@ -39,12 +40,16 @@ def prepare_nginx_certs(cert_key_path, cert_path):
     os.makedirs(host_ngx_real_cert_dir, mode=0o755)
     real_key_path = os.path.join(host_ngx_real_cert_dir, 'server.key')
     real_crt_path = os.path.join(host_ngx_real_cert_dir, 'server.crt')
+    real_root_ca_cert_path = os.path.join(host_ngx_real_cert_dir, 'ca.crt')
+
     shutil.copy2(host_ngx_cert_key_path, real_key_path)
     shutil.copy2(host_ngx_cert_path, real_crt_path)
+    shutil.copy2(host_ngnx_root_ca_cert_path, real_root_ca_cert_path)
 
     os.chown(host_ngx_real_cert_dir, uid=DEFAULT_UID, gid=DEFAULT_GID)
     mark_file(real_key_path, uid=DEFAULT_UID, gid=DEFAULT_GID)
     mark_file(real_crt_path, uid=DEFAULT_UID, gid=DEFAULT_GID)
+    mark_file(real_root_ca_cert_path, uid=DEFAULT_UID, gid=DEFAULT_GID)
 
 
 def render_nginx_template(config_dict):
@@ -53,14 +58,15 @@ def render_nginx_template(config_dict):
     2. copy additional configs to cert.d dir
     """
     if config_dict['protocol'] == 'https':
-        prepare_nginx_certs(config_dict['cert_key_path'], config_dict['cert_path'])
+        prepare_nginx_certs(config_dict['cert_key_path'], config_dict['cert_path'], config_dict['root_ca_cert_path'])
         render_jinja(
             nginx_https_conf_template,
             nginx_conf,
             uid=DEFAULT_UID,
             gid=DEFAULT_GID,
             ssl_cert=SSL_CERT_PATH,
-            ssl_cert_key=SSL_CERT_KEY_PATH)
+            ssl_cert_key=SSL_CERT_KEY_PATH,
+            ssl_root_ca_cert=SSL_ROOT_CA_CERT_KEY_PATH)
         location_file_pattern = CUSTOM_NGINX_LOCATION_FILE_PATTERN_HTTPS
 
     else:

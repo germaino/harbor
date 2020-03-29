@@ -67,8 +67,8 @@
         </clr-input-container>
         <clr-input-container>
             <label>{{'PROFILE.FINGERPRINT' | translate}}</label>
-            <input clrInput type="text" name="fingerprint" #fingerPrintInput="ngModel" [(ngModel)]="newUser.fingerprint" required maxLengthExt="80"
-                id="fingerprint" size="50" (input)='handleValidation("fingerprint", false)' (blur)='handleValidation("fingerprint", true)'>
+            <input clrInput type="text" #fingerPrintInput="ngModel" name="fingerprint"  [(ngModel)]="newUser.fingerprint" maxLengthExt="80" id="fingerprint" size="30" maxlength="50"
+                  (input)='handleValidation("fingerprint", false)' (blur)='handleValidation("fingerprint", true)'>
             <clr-control-error *ngIf='getValidationState("fingerprint")'>
                 {{'TOOLTIP.FINGERPRINT' | translate}}
             </clr-control-error>

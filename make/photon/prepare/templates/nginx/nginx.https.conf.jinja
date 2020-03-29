@@ -49,6 +49,12 @@ http {
     ssl_ciphers '!aNULL:kECDH+AESGCM:ECDH+AESGCM:RSA+AESGCM:kECDH+AES:ECDH+AES:RSA+AES:';
     ssl_prefer_server_ciphers on;
     ssl_session_cache shared:SSL:10m;
+
+    # Add client certificate verification but make it optional
+    ssl_client_certificate {{ssl_root_ca_cert}};
+    ssl_verify_client optional;
+    ssl_verify_depth 2;
+
   
     # disable any limits to avoid HTTP 413 for large image uploads
     client_max_body_size 0;
@@ -148,6 +154,10 @@ http {
       
       # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.
       proxy_set_header X-Forwarded-Proto $scheme;
+
+      # Forward certificate digest and whether certificate has been validated
+      proxy_set_header X-SSL-Client-Cert-Fingerprint $ssl_client_fingerprint;
+      proxy_set_header X-SSL-Client-Cert-Verify $ssl_client_verify;
 
       proxy_cookie_path / "/; Secure";
 

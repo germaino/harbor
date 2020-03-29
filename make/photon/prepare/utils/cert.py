@@ -12,6 +12,7 @@ from .misc import (
 
 SSL_CERT_PATH = os.path.join("/etc/cert", "server.crt")
 SSL_CERT_KEY_PATH = os.path.join("/etc/cert", "server.key")
+SSL_ROOT_CA_CERT_KEY_PATH = os.path.join("/etc/cert", "ca.crt")
 
 secret_keys_dir = '/secret/keys'
 

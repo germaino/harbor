@@ -184,8 +184,7 @@ func (s *secretReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
 type robotAuthReqCtxModifier struct{}
 
 func (r *robotAuthReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
-
-	log.Debug("Robot: Authentication")
+	log.Debug("robotAuthReqCtxModifier: Authentication")
 
 	robotName, robotTk, ok := ctx.Request.BasicAuth()
 	if !ok {
@@ -235,6 +234,7 @@ func (r *robotAuthReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
 type oidcCliReqCtxModifier struct{}
 
 func (oc *oidcCliReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
+	log.Debug("oidcCliReqCtxModifier: Authentication")
 	path := ctx.Request.URL.Path
 	if path != "/service/token" &&
 		!strings.HasPrefix(path, "/chartrepo/") &&
@@ -263,6 +263,7 @@ func (oc *oidcCliReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
 type idTokenReqCtxModifier struct{}
 
 func (it *idTokenReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
+	log.Debug("idTokenReqCtxModifier: Authentication")
 	req := ctx.Request
 	if req.Context().Value(AuthModeKey).(string) != common.OIDCAuth {
 		return false
@@ -310,6 +311,9 @@ func (it *idTokenReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
 type authProxyReqCtxModifier struct{}
 
 func (ap *authProxyReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
+
+	log.Debug("authProxyReqCtxModifier: Authentication")
+
 	if ctx.Request.Context().Value(AuthModeKey).(string) != common.HTTPAuth {
 		return false
 	}
@@ -324,6 +328,7 @@ func (ap *authProxyReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
 	if !ok {
 		return false
 	}
+	log.Debug("authProxyReqCtxModifier: BasicAuth done")
 
 	rawUserName, match := ap.matchAuthProxyUserName(proxyUserName)
 	if !match {
@@ -388,15 +393,40 @@ func (ap *authProxyReqCtxModifier) matchAuthProxyUserName(name string) (string, 
 type basicAuthReqCtxModifier struct{}
 
 func (b *basicAuthReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
-	log.Debug("BasicAuth: Authentication")
+	log.Debug("basicAuthReqCtxModifier: Authentication")
 
 	fmt.Printf("test: %+v\n", ctx.Request)
+
+        if ctx.Request.Header.Get("X-Ssl-Client-Cert-Verify") == "SUCCESS" {
+
+          log.Debug("basicAuthReqCtxModifier: User has been sucessfully authenticated with a its certificate")
+          cert_fingerprint := ctx.Request.Header.Get("X-Ssl-Client-Cert-Fingerprint")
+          log.Debug("basicAuthReqCtxModifier: Finding user associated to certificate fingerprint")
+          dao.DumpTable(cert_fingerprint)
+          userQuery := models.User{Fingerprint: cert_fingerprint}
+          user, err := dao.GetUserCert(userQuery)
+
+          if err != nil {
+	    log.Errorf("Fail to identify user from fingerprint: %s, error: %v", cert_fingerprint, err)
+	    return false
+          }
+
+          // common part to DB and Certification authentication
+	  log.Debug("using local database project manager")
+	  pm := config.GlobalProjectMgr
+	  log.Debug("creating local database security context...")
+	  securCtx := local.NewSecurityContext(user, pm)
+	  setSecurCtxAndPM(ctx.Request, securCtx, pm)
+	  return true
+        }
+
+
 	username, password, ok := ctx.Request.BasicAuth()
 	if !ok {
 		log.Debug("BasicAuth: Basic auth fail")
 		return false
 	}
-	log.Debug("got user information via basic auth")
+        log.Debug("basicAuthReqCtxModifier: got user information via basic auth")
 
 	// integration with admiral
 	if config.WithAdmiral() {
@@ -443,8 +473,14 @@ func (b *basicAuthReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
 		setSecurCtxAndPM(ctx.Request, securCtx, pm)
 		return true
 	}
+        log.Debugf("basicAuthReqCtxModifier: Header X-Ssl-Client-Cert-Verify: %v", ctx.Request.Header.Get("X-Ssl-Client-Cert-Verify"))
+        log.Debugf("basicAuthReqCtxModifier: Header X-Ssl-Client-Cert-Fingerprint: %v", ctx.Request.Header.Get("X-Ssl-Client-Cert-Fingerprint"))
+        log.Debugf("basicAuthReqCtxModifier: Context: %v", ctx.Request.Context())
 
 	// standalone
+        log.Debugf("basicAuthReqCtxModifier: Principal: %v", username)
+        log.Debugf("basicAuthReqCtxModifier: Password: %v", password)
+
 	user, err := auth.Login(models.AuthModel{
 		Principal: username,
 		Password:  password,
@@ -457,19 +493,21 @@ func (b *basicAuthReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
 		log.Debug("basic auth user is nil")
 		return false
 	}
+        // common part to DB and Certification authentication
 	log.Debug("using local database project manager")
 	pm := config.GlobalProjectMgr
 	log.Debug("creating local database security context...")
 	securCtx := local.NewSecurityContext(user, pm)
 	setSecurCtxAndPM(ctx.Request, securCtx, pm)
 	return true
+
 }
 
 type sessionReqCtxModifier struct{}
 
 func (s *sessionReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
 
-	log.Debug("SessioncAuth: Authentication")
+	log.Debug("sessionReqCtxModifier: Authentication")
 	userInterface := ctx.Input.Session("user")
 	if userInterface == nil {
 		log.Debug("can not get user information from session")
@@ -494,6 +532,7 @@ func (s *sessionReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
 type tokenReqCtxModifier struct{}
 
 func (t *tokenReqCtxModifier) Modify(ctx *beegoctx.Context) bool {
+	log.Debug("tokenReqCtxModifier: Authentication")
 	token := ctx.Request.Header.Get(authcontext.AuthTokenHeader)
 	if len(token) == 0 {
 		return false

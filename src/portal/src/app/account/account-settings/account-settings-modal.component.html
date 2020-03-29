@@ -60,7 +60,7 @@
             </clr-input-container>
             <clr-input-container>
                 <label>{{'PROFILE.FINGERPRINT' | translate}}</label>
-                <input clrInput type="text" #fingerPrintInput="ngModel" maxlength="50" size="50"
+                <input clrInput type="text" #fingerPrintInput="ngModel" maxlength="50" size="30" maxLengthExt="80"
                     name="account_settings_fingerprint" [(ngModel)]="account.fingerprint" id="account_settings_fingerprint">
                 <clr-control-error *ngIf="fingerPrintInput.invalid && (fingerPrintInput.dirty || fingerPrintInput.touched)">
                     {{'TOOLTIP.FINGERPRINT' | translate}}

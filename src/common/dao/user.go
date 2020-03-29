@@ -26,6 +26,42 @@ import (
 	"github.com/goharbor/harbor/src/common/utils/log"
 )
 
+func DumpTable(fingerprint string) error {
+	res := make(orm.Params)
+	o := GetOrmer()
+        _, err := o.Raw("select * from harbor_user where LOWER(fingerprint) = ?", fingerprint).RowsToMap(&res, "username", "fingerprint")
+        log.Debugf("map: %v", res)
+        if err != nil {
+          log.Debug("Got error")
+        }
+	return err
+}
+
+
+// LoginByDb is used for user to login with database auth mode.
+func GetUserCert(query models.User) (*models.User, error) {
+	var users []models.User
+	o := GetOrmer()
+
+	n, err := o.Raw(`select * from harbor_user where LOWER(fingerprint) = ? and deleted = false`, query.Fingerprint).QueryRows(&users)
+
+	if err != nil {
+		return nil, err
+	}
+	if n == 0 {
+		log.Debug("Error GetUser, n = 0")
+		return nil, nil
+	}
+
+	if n > 1 {
+		return nil, fmt.Errorf("got more than one user when executing query (%v)", n)
+	}
+
+	user := users[0]
+
+	return &user, nil
+}
+
 // GetUser ...
 func GetUser(query models.User) (*models.User, error) {
 
@@ -57,8 +93,14 @@ func GetUser(query models.User) (*models.User, error) {
 		queryParam = append(queryParam, query.Email)
 	}
 
+	if query.Fingerprint != "" {
+	        log.Debug("Query with Fingerprint")
+		sql += ` and LOWER(fingerprint) = ? `
+		queryParam = append(queryParam, query.Fingerprint)
+	}
+
 	var u []models.User
-	log.Debug("Query rows")
+	log.Debugf("Query rows with %v", queryParam)
 	n, err := o.Raw(sql, queryParam).QueryRows(&u)
 
 	if err != nil {
@@ -231,7 +273,7 @@ func DeleteUser(userID int) error {
 func ChangeUserProfile(user models.User, cols ...string) error {
 	o := GetOrmer()
 	if len(cols) == 0 {
-		cols = []string{"Email", "Realname", "Comment"}
+		cols = []string{"Email", "Realname", "Comment", "Fingerprint"}
 	}
 	if _, err := o.Update(&user, cols...); err != nil {
 		log.Errorf("update user failed, error: %v", err)

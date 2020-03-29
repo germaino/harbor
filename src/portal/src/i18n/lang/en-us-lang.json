@@ -73,7 +73,7 @@
         "EMAIL": "Email should be a valid email address like name@example.com.",
         "USER_NAME": "Cannot contain special characters and maximum length should be 255 characters.",
         "FULL_NAME": "Maximum length should be 20 characters.",
-        "FINGERPRINT": "Maximum length should be 100 characters.",
+        "FINGERPRINT": "Maximum length should be 50 characters.",
         "COMMENT": "Length of comment should be less than 30 characters.",
         "CURRENT_PWD": "Current password is required.",
         "PASSWORD": "Password should be 8-20 characters long with at least 1 uppercase, 1 lowercase and 1 number.",

@@ -27,6 +27,8 @@ def validate(conf: dict, **kwargs):
             raise Exception("Error: The protocol is https but attribute ssl_cert is not set")
         if not conf.get("cert_key_path") or conf['cert_key_path'] == default_https_key_path:
             raise Exception("Error: The protocol is https but attribute ssl_cert_key is not set")
+        if not conf.get("root_ca_cert_path"):
+            raise Exception("Error: The protocol is https but attribute ssl_root_ca_cert is not set")
     if protocol == "http":
         logging.warning("WARNING: HTTP protocol is insecure. Harbor will deprecate http protocol in the future. Please make sure to upgrade to https")
 
@@ -125,6 +127,7 @@ def parse_yaml_config(config_file_path, with_notary, with_clair, with_chartmuseu
         config_dict['https_port'] = https_config.get('port', 443)
         config_dict['cert_path'] = https_config["certificate"]
         config_dict['cert_key_path'] = https_config["private_key"]
+        config_dict['root_ca_cert_path'] = https_config["root_ca_cert"]
 
     if configs.get('external_url'):
         config_dict['public_url'] = configs.get('external_url')

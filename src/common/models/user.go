@@ -28,7 +28,7 @@ type User struct {
 	Email           string `orm:"column(email)" json:"email"`
 	Password        string `orm:"column(password)" json:"password"`
 	PasswordVersion string `orm:"column(password_version)" json:"password_version"`
-	Fingerprint     string `orm:"column(fingerprint)" json:"fingerprint"`
+	Fingerprint     string `orm:"size(100) column(fingerprint)" json:"fingerprint"`
 	Realname        string `orm:"column(realname)" json:"realname"`
 	Comment         string `orm:"column(comment)" json:"comment"`
 	Deleted         bool   `orm:"column(deleted)" json:"deleted"`
