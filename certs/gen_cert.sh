@@ -38,7 +38,7 @@ extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 
 [alt_names]
-IP.1=127.0.0.1
+IP.1=$IP
 DNS.1=$HOST
 EOF
 
