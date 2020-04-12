@@ -31,7 +31,7 @@ openssl genrsa -out $CA_ROOT/certs/users/$USERNAME.key $KEY_LEN
 
 echo "Generate a Certificate Signing Request"
 openssl req -sha512 -new \
-    -subj "/C=FR/ST=Grenoble/L=Grenbole/O=Schneider Electric/OU=ETP/CN=$USERNAME" \
+    -subj "/C=FR/ST=Isere/L=Grenbole/O=Schneider Electric/OU=ETP/CN=$USERNAME" \
     -key $CA_ROOT/certs/users/$USERNAME.key \
     -out $CA_ROOT/certs/users/$USERNAME.csr \
     -config <(cat /etc/ssl/openssl.cnf | sed "s/RANDFILE\s*=\s*\$ENV::HOME\/\.rnd/#/")
@@ -55,3 +55,4 @@ sudo mkdir -p /etc/docker/certs.d/$HOST
 sudo cp $CA_ROOT/certs/users/$USERNAME.cert /etc/docker/certs.d/$HOST
 sudo cp $CA_ROOT/certs/users/$USERNAME.key /etc/docker/certs.d/$HOST
 sudo cp $CA_ROOT/certs/ca.crt /etc/docker/certs.d/$HOST
+sudo systemctl restart docker.service
